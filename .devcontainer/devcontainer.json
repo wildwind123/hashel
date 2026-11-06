@@ -1,0 +1,59 @@
+{
+    "name": "vite-plugin-hashel",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "NODE_VERSION": "26.13.0",
+            "VP_VERSION": "1.5.0",
+            "PNPM_VERSION": "12.18.0",
+            "PLAYWRIGHT_VERSION": "1.65.0-alpha-2026-10-30",
+            "HTTP_PROXY": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+            "HTTPS_PROXY": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+            "NO_PROXY": "localhost,127.0.0.1",
+            "http_proxy": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+            "https_proxy": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+            "no_proxy": "localhost,127.0.0.1"
+        },
+        "options": [
+            "--add-host=host.docker.internal:host-gateway",
+            "--add-host=host.external:${localEnv:HOST_IP:host-gateway}"
+        ]
+    },
+    "runArgs": [
+        "--name=vite-plugin-hashel-dev-${localEnv:VITE_PLUGIN_HASHEL_INSTANCE:default}",
+        "--add-host=host.docker.internal:host-gateway",
+        "--add-host=host.external:${localEnv:HOST_IP:host-gateway}",
+        "--env-file=.devcontainer/.env"
+    ],
+    "mounts": [
+        "source=pnpm-store,target=/pnpm-store,type=volume,consistency=cached",
+        "source=claude,target=/home/vscode/.claude,type=volume,consistency=cached",
+        "source=vscode-server-vite-plugin-hashel,target=/home/vscode/.vscode-server,type=volume,consistency=cached",
+        "source=vite-plugin-hashel-vp-cache,target=/home/vscode/.cache,type=volume,consistency=cached"
+    ],
+    "containerEnv": {
+        "npm_config_store_dir": "/pnpm-store",
+        "pnpm_config_store_dir": "/pnpm-store",
+        "CONTAINER_NAME": "vite-plugin-hashel-dev-${localEnv:VITE_PLUGIN_HASHEL_INSTANCE:default}",
+        "HTTP_PROXY": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+        "HTTPS_PROXY": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+        "NO_PROXY": "localhost,127.0.0.1,host.docker.internal,host.external",
+        "http_proxy": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+        "https_proxy": "${localEnv:VPN_DOCKER_HTTP_PROXY}",
+        "no_proxy": "localhost,127.0.0.1,host.docker.internal,host.external",
+        "PROJECT_NAME": "${localWorkspaceFolderBasename}",
+        "WORKSPACE_DIR": "${containerWorkspaceFolder}"
+    },
+    "initializeCommand": "touch .devcontainer/.env",
+    "postCreateCommand": "(cd vite-plugin-hashel && vp install && vp run build) && (cd vue && vp install) && (cd svelte && vp install)",
+    "forwardPorts": [5173, 5174, 4173, 4174],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "anthropic.claude-code",
+                "VoidZero.vite-plus-extension-pack"
+            ]
+        }
+    },
+    "remoteUser": "vscode"
+}
